@@ -86,6 +86,10 @@ export function PageClientImpl(props: {
             defaults={preJoinDefaults}
             onSubmit={handlePreJoinSubmit}
             onError={handlePreJoinError}
+            joinLabel="进入家庭会议"
+            micLabel="麦克风"
+            camLabel="摄像头"
+            userLabel="您的称呼"
           />
         </div>
       ) : (
@@ -158,7 +162,7 @@ function VideoConferenceComponent(props: {
           room.setE2EEEnabled(true).catch((e) => {
             if (e instanceof DeviceUnsupportedError) {
               alert(
-                `You're trying to join an encrypted meeting, but your browser does not support it. Please update it to the latest version and try again.`,
+                `您正在尝试加入加密会议，但您的当前浏览器不支持。请更新浏览器到最新版本后重试。`,
               );
               console.error(e);
             } else {
@@ -217,12 +221,12 @@ function VideoConferenceComponent(props: {
   const handleOnLeave = React.useCallback(() => router.push('/'), [router]);
   const handleError = React.useCallback((error: Error) => {
     console.error(error);
-    alert(`Encountered an unexpected error, check the console logs for details: ${error.message}`);
+    alert(`遇到意外错误，请检查设备权限或联系管理员：${error.message}`);
   }, []);
   const handleEncryptionError = React.useCallback((error: Error) => {
     console.error(error);
     alert(
-      `Encountered an unexpected encryption error, check the console logs for details: ${error.message}`,
+      `遇到加密错误，无法建立安全连接：${error.message}`,
     );
   }, []);
 
