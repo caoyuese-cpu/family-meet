@@ -56,8 +56,6 @@ export function PageClientImpl(props: {
     undefined,
   );
 
-  // DNS and TLS state is cached by the browser, not the Room, so warming up on a separate Room
-  // speeds up the conference Room's connect.
   React.useEffect(() => {
     if (props.serverUrl) {
       new Room().prepareConnection(props.serverUrl);
@@ -75,7 +73,8 @@ export function PageClientImpl(props: {
     const connectionDetailsResp = await fetch(url.toString());
     const connectionDetailsData = await connectionDetailsResp.json();
     setConnectionDetails(connectionDetailsData);
-  }, []);
+  }, [props.roomName, props.region]);
+
   const handlePreJoinError = React.useCallback((e: any) => console.error(e), []);
 
   return (
@@ -89,7 +88,7 @@ export function PageClientImpl(props: {
             joinLabel="进入家庭会议"
             micLabel="麦克风"
             camLabel="摄像头"
-            userLabel="您的称呼"
+            userLabel="您的称呼（如：大舅、三姨）"
           />
         </div>
       ) : (
@@ -150,9 +149,9 @@ function VideoConferenceComponent(props: {
       e2ee: keyProvider && worker && e2eeEnabled ? { keyProvider, worker } : undefined,
       singlePeerConnection: props.options.singlePeerConnection,
     };
-  }, [props.userChoices, props.options.hq, props.options.codec]);
+  }, [props.userChoices, props.options.hq, props.options.codec, e2eeEnabled, keyProvider, worker]);
 
-  const room = React.useMemo(() => new Room(roomOptions), []);
+  const room = React.useMemo(() => new Room(roomOptions), [roomOptions]);
 
   React.useEffect(() => {
     if (e2eeEnabled) {
@@ -174,12 +173,25 @@ function VideoConferenceComponent(props: {
     } else {
       setE2eeSetupComplete(true);
     }
-  }, [e2eeEnabled, room, e2eePassphrase]);
+  }, [e2eeEnabled, room, e2eePassphrase, keyProvider]);
 
   const connectOptions = React.useMemo((): RoomConnectOptions => {
     return {
       autoSubscribe: true,
     };
+  }, []);
+
+  const router = useRouter();
+  const handleOnLeave = React.useCallback(() => router.push('/'), [router]);
+  const handleError = React.useCallback((error: Error) => {
+    console.error(error);
+    alert(`遇到意外错误，请检查设备权限或联系管理员：${error.message}`);
+  }, []);
+  const handleEncryptionError = React.useCallback((error: Error) => {
+    console.error(error);
+    alert(
+      `遇到加密错误，无法建立安全连接：${error.message}`,
+    );
   }, []);
 
   React.useEffect(() => {
@@ -213,22 +225,9 @@ function VideoConferenceComponent(props: {
       room.off(RoomEvent.EncryptionError, handleEncryptionError);
       room.off(RoomEvent.MediaDevicesError, handleError);
     };
-  }, [e2eeSetupComplete, room, props.connectionDetails, props.userChoices]);
+  }, [e2eeSetupComplete, room, props.connectionDetails, props.userChoices, connectOptions, handleOnLeave, handleEncryptionError, handleError]);
 
   const lowPowerMode = useLowCPUOptimizer(room);
-
-  const router = useRouter();
-  const handleOnLeave = React.useCallback(() => router.push('/'), [router]);
-  const handleError = React.useCallback((error: Error) => {
-    console.error(error);
-    alert(`遇到意外错误，请检查设备权限或联系管理员：${error.message}`);
-  }, []);
-  const handleEncryptionError = React.useCallback((error: Error) => {
-    console.error(error);
-    alert(
-      `遇到加密错误，无法建立安全连接：${error.message}`,
-    );
-  }, []);
 
   React.useEffect(() => {
     if (lowPowerMode) {
