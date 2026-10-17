@@ -26,7 +26,7 @@ export default async function Page({
     return (
       <div style={{position:'fixed',top:0,left:0,width:'100vw',height:'100vh',backgroundColor:'rgba(0,0,0,0.9)',zIndex:99999,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',color:'white',textAlign:'center',padding:'20px'}}>
         <h1 style={{fontSize:'24px',marginBottom:'10px'}}>🛑 微信限制无法使用</h1>
-        <p style={{fontSize:'18px',lineHeight:'1.5'}}>请点击屏幕右上角的 <strong>[···]</strong> 图标<br/>选择 <strong>"在默认浏览器中打开"</strong><br/>以正常使用麦克风和摄像头。</p>
+        <p style={{fontSize:'18px',lineHeight:'1.5'}}>请点击屏幕右上角的 <strong>[···]</strong> 图标<br/>选择 <strong>“在默认浏览器中打开”</strong><br/>以正常使用麦克风和摄像头。</p>
       </div>
     );
   }
